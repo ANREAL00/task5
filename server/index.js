@@ -23,29 +23,20 @@ app.use(express.json());
 app.get('/api/songs', (req, res) => {
     const { seed, page = 1, locale = 'en_US', likes = 0 } = req.query;
 
-    if (!seed) {
-        return res.status(400).json({ error: 'Seed is required' });
-    }
-
     const pageSize = 20;
     const pageSeed = `${seed}-${page}`;
     const rng = seedrandom(pageSeed);
 
-    const currentFaker = fakers[locale] || fakers.en_US;
+    const currentFaker = fakers[locale];
     currentFaker.seed(Math.abs(rng.int32()));
 
     const songs = [];
     for (let i = 0; i < pageSize; i++) {
         const index = (page - 1) * pageSize + i + 1;
 
-        // Random likes based on technical requirements and seed logic
-        const baseLikes = Math.floor(likes);
-        const fractionalPart = likes % 1;
-        const extraLike = rng() < fractionalPart ? 1 : 0;
-        const totalLikes = baseLikes + extraLike;
+        const totalLikes = Math.floor(likes) + (rng() < (likes % 1) ? 1 : 0);
 
-        const isEnglish = locale === 'en_US';
-        const albumTitle = isEnglish
+        const albumTitle = locale === 'en_US'
             ? currentFaker.music.album()
             : currentFaker.word.words({ count: { min: 1, max: 3 } }).replace(/^\w/, c => c.toUpperCase());
 

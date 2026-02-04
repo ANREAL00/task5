@@ -69,7 +69,8 @@ const App = () => {
   };
 
   const generateRandomSeed = () => {
-    const randomSeed = Math.floor(Math.random() * 1000000).toString();
+    const hex = Array.from({ length: 16 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
+    const randomSeed = BigInt(`0x${hex}`).toString();
     handleParamChange('seed', randomSeed);
   };
 
@@ -81,7 +82,6 @@ const App = () => {
     return `Every beat reminds me of you, tearing me apart\nIn the million suns that shine, you're the brightest star\nAt the break of dawn, you're all I want, no matter how far\n\nOh ${title.split(' ')[0]}, I try to move on...`;
   }
 
-  // View toggle handler
   const handleViewChange = (mode) => {
     setViewMode(mode);
     setPage(1);
@@ -89,7 +89,6 @@ const App = () => {
     fetchSongs(params, 1, false);
   };
 
-  // Intersection Observer for Infinite Scroll in Gallery
   useEffect(() => {
     if (viewMode !== 'gallery') return;
     const observer = new IntersectionObserver((entries) => {
@@ -166,7 +165,7 @@ const App = () => {
                       <td>{song.genre}</td>
                       <td>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                          <Heart size={14} fill="#f87171" color="#f87171" />
+                          <Heart size={16} fill="#e65353" color="#f87171" />
                           <span>{song.likes}</span>
                         </div>
                       </td>
@@ -177,10 +176,6 @@ const App = () => {
                           <div className="expanded-content">
                             <div className="cover-art-container">
                               <AlbumCover song={song} />
-                              <div className="likes-badge" style={{ marginTop: '0.5rem' }}>
-                                <Heart size={14} fill="#f87171" color="#f87171" style={{ marginRight: '0.3rem' }} />
-                                <span style={{ fontWeight: 700, color: '#1e293b' }}>{song.likes}</span>
-                              </div>
                             </div>
                             <div className="song-details">
                               <h2>{song.title}</h2>
@@ -200,7 +195,7 @@ const App = () => {
                               </div>
                               <div className="lyrics-body">
                                 {getLyrics(song.title).split('\n').map((line, i) => (
-                                  <p key={i} style={{ fontWeight: i === 2 ? 700 : 400 }}>{line}</p>
+                                  <p key={i}>{line}</p>
                                 ))}
                               </div>
                             </div>
@@ -243,8 +238,6 @@ const App = () => {
                   window.scrollTo(0, 0);
                 }}>
                   <AlbumCover song={song} />
-                  <h3>{song.title}</h3>
-                  <p>{song.artist}</p>
                 </div>
               ))}
             </div>
@@ -263,7 +256,7 @@ const App = () => {
       {loading && (
         <div className="loading-overlay">
           <RefreshCw size={40} className="spin" color="#3b82f6" />
-          <p>Syncing beats...</p>
+          <p>Loading...</p>
         </div>
       )}
     </div>

@@ -125,7 +125,6 @@ body {
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed;
-  /* CRITICAL: Fixes column widths */
 }
 
 .data-table th,
@@ -151,12 +150,12 @@ body {
 /* Precise widths */
 .data-table th:nth-child(1),
 .data-table td:nth-child(1) {
-  width: 90px;
+  width: 6%;
 }
 
 .data-table th:nth-child(2),
 .data-table td:nth-child(2) {
-  width: 30%;
+  width: 33%;
 }
 
 .data-table th:nth-child(3),
@@ -176,7 +175,7 @@ body {
 
 .data-table th:nth-child(6),
 .data-table td:nth-child(6) {
-  width: 100px;
+  width: 5%;
 }
 
 .id-cell-wrapper {
@@ -191,7 +190,7 @@ body {
 }
 
 .expanded-row {
-  background-color: #f0f7ff;
+  background-color: #f4f9ff;
 }
 
 .expanded-content {
@@ -356,7 +355,6 @@ body {
   border-color: var(--primary);
 }
 
-/* New Album Cover Styles */
 .album-cover-container {
   width: 100%;
   aspect-ratio: 1/1;
@@ -407,7 +405,6 @@ body {
   color: #0f172a;
   line-height: 1.25;
   word-wrap: break-word;
-  /* Ensure wrapping */
 }
 
 .label-artist {
@@ -423,12 +420,6 @@ body {
   background: var(--primary);
   margin-top: 0.5rem;
   border-radius: 2px;
-}
-
-/* Remove old song-card text styles as they are now in the cover */
-.song-card h3,
-.song-card p {
-  display: none;
 }
 
 .loading-overlay {

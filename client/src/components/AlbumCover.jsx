@@ -15,8 +15,7 @@ const AlbumCover = React.memo(({ song }) => {
             'initials'
         ];
         const rng = seedrandom(song.mediaSeed);
-        const styleIndex = Math.floor(rng() * styles.length);
-        const selectedStyle = styles[styleIndex];
+        const selectedStyle = styles[Math.floor(rng() * styles.length)];
 
         return `https://api.dicebear.com/9.x/${selectedStyle}/svg?seed=${song.mediaSeed}&radius=0&randomizeIds=true`;
     }, [song.mediaSeed]);
@@ -36,11 +35,8 @@ const AlbumCover = React.memo(({ song }) => {
             />
             <div className="album-label-overlay">
                 <div className="label-content">
-                    <div className="label-header">
-                        <span className="label-meta">TRK. {song.id.toString().padStart(6, '0')}</span>
-                    </div>
                     <h4 className="label-title">{song.title}</h4>
-                    <p className="label-artist">{song.artist}</p>
+                    <h5 className="label-artist">{song.artist}</h5>
                 </div>
                 <div className="label-accent-bar"></div>
             </div>
