@@ -1,18 +1,19 @@
 import express from 'express';
 import cors from 'cors';
-import { faker } from '@faker-js/faker';
+import { Faker, en, de, pl } from '@faker-js/faker';
 import seedrandom from 'seedrandom';
 
 const app = express();
 const PORT = 3001;
 
+const fakers = {
+    en_US: new Faker({ locale: [en] }),
+    de_DE: new Faker({ locale: [de] }),
+    pl_PL: new Faker({ locale: [pl] }),
+};
+
 app.use(cors());
 app.use(express.json());
-
-// Helper function to create a seeded RNG
-const createRNG = (seed) => {
-    return seedrandom(seed);
-};
 
 app.get('/api/songs', (req, res) => {
     const { seed, page = 1, locale = 'en_US', likes = 0 } = req.query;
@@ -23,29 +24,28 @@ app.get('/api/songs', (req, res) => {
 
     const pageSize = 20;
     const pageSeed = `${seed}-${page}`;
-    const rng = createRNG(pageSeed);
+    const rng = seedrandom(pageSeed);
 
-    // Set faker seed
-    faker.seed(rng.int32());
-    // Set locale (Note: faker.setLocale is deprecated in newer versions, use locale specific fakers)
-    // For now we use the default and will refine later
+    const currentFaker = fakers[locale];
+    currentFaker.seed(Math.abs(rng.int32()));
 
     const songs = [];
     for (let i = 0; i < pageSize; i++) {
         const index = (page - 1) * pageSize + i + 1;
 
-        // Probability for likes
         const baseLikes = Math.floor(likes);
         const extraLike = rng() < (likes % 1) ? 1 : 0;
         const totalLikes = baseLikes + extraLike;
 
         songs.push({
             id: index,
-            title: faker.music.songName(),
-            artist: faker.person.fullName(),
-            album: rng() > 0.2 ? faker.music.album() : 'Single',
-            genre: faker.music.genre(),
-            likes: totalLikes
+            title: currentFaker.music.songName(),
+            artist: currentFaker.music.artist(),
+            album: rng() > 0.2 ? currentFaker.music.album() : 'Single',
+            genre: currentFaker.music.genre(),
+            likes: totalLikes,
+            review: currentFaker.lorem.paragraph(),
+            mediaSeed: `${pageSeed}-${i}`
         });
     }
 
