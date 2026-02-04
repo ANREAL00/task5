@@ -21,6 +21,7 @@ const App = () => {
 
   const paramsRef = useRef(params);
   const isFetchingRef = useRef(false);
+  const sentinelRef = useRef();
 
   const fetchSongs = useCallback(async (currentParams, currentPage, append = false) => {
     if (isFetchingRef.current && append) return;
@@ -80,6 +81,31 @@ const App = () => {
     return `Every beat reminds me of you, tearing me apart\nIn the million suns that shine, you're the brightest star\nAt the break of dawn, you're all I want, no matter how far\n\nOh ${title.split(' ')[0]}, I try to move on...`;
   }
 
+  // View toggle handler
+  const handleViewChange = (mode) => {
+    setViewMode(mode);
+    setPage(1);
+    setExpandedId(null);
+    fetchSongs(params, 1, false);
+  };
+
+  // Intersection Observer for Infinite Scroll in Gallery
+  useEffect(() => {
+    if (viewMode !== 'gallery') return;
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && !loading) {
+        setPage(prev => {
+          const next = prev + 1;
+          fetchSongs(paramsRef.current, next, true);
+          return next;
+        });
+      }
+    }, { threshold: 0.1 });
+
+    if (sentinelRef.current) observer.observe(sentinelRef.current);
+    return () => observer.disconnect();
+  }, [viewMode, loading, fetchSongs]);
+
   return (
     <div className="app-container">
       <div className="toolbar">
@@ -105,8 +131,8 @@ const App = () => {
         </div>
 
         <div className="view-toggle">
-          <button className={`btn-toggle ${viewMode === 'table' ? 'active' : ''}`} onClick={() => setViewMode('table')}><TableIcon size={18} /></button>
-          <button className={`btn-toggle ${viewMode === 'gallery' ? 'active' : ''}`} onClick={() => setViewMode('gallery')}><LayoutGrid size={18} /></button>
+          <button className={`btn-toggle ${viewMode === 'table' ? 'active' : ''}`} onClick={() => handleViewChange('table')}><TableIcon size={18} /></button>
+          <button className={`btn-toggle ${viewMode === 'gallery' ? 'active' : ''}`} onClick={() => handleViewChange('gallery')}><LayoutGrid size={18} /></button>
         </div>
       </div>
 
@@ -186,40 +212,52 @@ const App = () => {
                 ))}
               </tbody>
             </table>
+            <div className="pagination">
+              <button className="btn-page" disabled={page === 1} onClick={() => { setPage(page - 1); fetchSongs(params, page - 1); }}>«</button>
+              {[...Array(3)].map((_, i) => (
+                <button
+                  key={i}
+                  className={`btn-page ${page === page + i - (page > 1 ? 1 : 0) ? 'active' : ''}`}
+                  onClick={() => {
+                    const targetPage = page + i - (page > 1 ? 1 : 0);
+                    setPage(targetPage);
+                    fetchSongs(params, targetPage);
+                  }}
+                >
+                  {page + i - (page > 1 ? 1 : 0)}
+                </button>
+              ))}
+              <button className="btn-page" onClick={() => { setPage(page + 1); fetchSongs(params, page + 1); }}>»</button>
+            </div>
           </div>
         ) : (
-          <div className="gallery-grid">
-            {data.map((song) => (
-              <div key={`${song.id}-${song.mediaSeed}`} className="song-card" onClick={() => {
-                setViewMode('table');
-                setExpandedId(song.id);
-                window.scrollTo(0, 0);
-              }}>
-                <AlbumCover song={song} />
-                <h3>{song.title}</h3>
-                <p>{song.artist}</p>
-              </div>
-            ))}
-          </div>
+          <>
+            <div className="gallery-grid">
+              {data.map((song) => (
+                <div key={`${song.id}-${song.mediaSeed}`} className="song-card" onClick={() => {
+                  const targetPage = Math.floor((song.id - 1) / 20) + 1;
+                  setPage(targetPage);
+                  setViewMode('table');
+                  setExpandedId(song.id);
+                  fetchSongs(params, targetPage, false); // Fetch only the target page
+                  window.scrollTo(0, 0);
+                }}>
+                  <AlbumCover song={song} />
+                  <h3>{song.title}</h3>
+                  <p>{song.artist}</p>
+                </div>
+              ))}
+            </div>
+            <div ref={sentinelRef} className="loader-sentinel">
+              {loading && (
+                <div className="loading-overlay-inline">
+                  <RefreshCw size={24} className="spin" color="#3b82f6" />
+                  <span>Loading more...</span>
+                </div>
+              )}
+            </div>
+          </>
         )}
-      </div>
-
-      <div className="pagination">
-        <button className="btn-page" disabled={page === 1} onClick={() => { setPage(page - 1); fetchSongs(params, page - 1); }}>«</button>
-        {[...Array(3)].map((_, i) => (
-          <button
-            key={i}
-            className={`btn-page ${page === page + i - (page > 1 ? 1 : 0) ? 'active' : ''}`}
-            onClick={() => {
-              const targetPage = page + i - (page > 1 ? 1 : 0);
-              setPage(targetPage);
-              fetchSongs(params, targetPage);
-            }}
-          >
-            {page + i - (page > 1 ? 1 : 0)}
-          </button>
-        ))}
-        <button className="btn-page" onClick={() => { setPage(page + 1); fetchSongs(params, page + 1); }}>»</button>
       </div>
 
       {loading && (
