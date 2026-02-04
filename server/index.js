@@ -1,15 +1,20 @@
 import express from 'express';
 import cors from 'cors';
-import { Faker, en, de, pl } from '@faker-js/faker';
+import { Faker, en, pl } from '@faker-js/faker';
 import seedrandom from 'seedrandom';
 
 const app = express();
 const PORT = 3001;
 
+const plCustom = {
+    music: {
+        artist: pl.person.last_name.generic,
+    }
+};
+
 const fakers = {
     en_US: new Faker({ locale: [en] }),
-    de_DE: new Faker({ locale: [de] }),
-    pl_PL: new Faker({ locale: [pl] }),
+    pl_PL: new Faker({ locale: [plCustom, pl, en] }),
 };
 
 app.use(cors());
@@ -26,22 +31,29 @@ app.get('/api/songs', (req, res) => {
     const pageSeed = `${seed}-${page}`;
     const rng = seedrandom(pageSeed);
 
-    const currentFaker = fakers[locale];
+    const currentFaker = fakers[locale] || fakers.en_US;
     currentFaker.seed(Math.abs(rng.int32()));
 
     const songs = [];
     for (let i = 0; i < pageSize; i++) {
         const index = (page - 1) * pageSize + i + 1;
 
+        // Random likes based on technical requirements and seed logic
         const baseLikes = Math.floor(likes);
-        const extraLike = rng() < (likes % 1) ? 1 : 0;
+        const fractionalPart = likes % 1;
+        const extraLike = rng() < fractionalPart ? 1 : 0;
         const totalLikes = baseLikes + extraLike;
+
+        const isEnglish = locale === 'en_US';
+        const albumTitle = isEnglish
+            ? currentFaker.music.album()
+            : currentFaker.word.words({ count: { min: 1, max: 3 } }).replace(/^\w/, c => c.toUpperCase());
 
         songs.push({
             id: index,
             title: currentFaker.music.songName(),
             artist: currentFaker.music.artist(),
-            album: rng() > 0.2 ? currentFaker.music.album() : 'Single',
+            album: rng() > 0.2 ? albumTitle : 'Single',
             genre: currentFaker.music.genre(),
             likes: totalLikes,
             review: currentFaker.lorem.paragraph(),
