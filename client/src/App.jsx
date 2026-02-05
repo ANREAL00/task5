@@ -9,7 +9,6 @@ import './index.css';
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3001/api';
 
 const App = () => {
-  console.log('🔌 API_BASE Configured as:', API_BASE);
   const [params, setParams] = useState({
     seed: '123',
     locale: 'en_US',

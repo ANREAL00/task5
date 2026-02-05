@@ -22,10 +22,6 @@ const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 app.use(cors());
 app.use(express.json());
 
-app.get('/', (req, res) => {
-    res.send('Music Showcase Server is running! Use /api/songs endpoint.');
-});
-
 app.get('/api/songs', (req, res) => {
     const { seed, page = 1, locale = 'en_US', likes = 0 } = req.query;
 
