@@ -17,6 +17,8 @@ const fakers = {
     pl_PL: new Faker({ locale: [plCustom, pl, en] }),
 };
 
+const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
+
 app.use(cors());
 app.use(express.json());
 
@@ -27,27 +29,46 @@ app.get('/api/songs', (req, res) => {
     const pageSeed = `${seed}-${page}`;
     const rng = seedrandom(pageSeed);
 
-    const currentFaker = fakers[locale];
+    const currentFaker = fakers[locale] || fakers.en_US;
     currentFaker.seed(Math.abs(rng.int32()));
 
     const songs = [];
     for (let i = 0; i < pageSize; i++) {
         const index = (page - 1) * pageSize + i + 1;
+        const songRng = seedrandom(`${pageSeed}-${i}`);
 
-        const totalLikes = Math.floor(likes) + (rng() < (likes % 1) ? 1 : 0);
+        currentFaker.seed(Math.abs(songRng.int32()));
 
         const albumTitle = locale === 'en_US'
             ? currentFaker.music.album()
             : currentFaker.word.words({ count: { min: 1, max: 3 } }).replace(/^\w/, c => c.toUpperCase());
 
+        const title = currentFaker.music.songName();
+        const artist = currentFaker.music.artist();
+        const genre = currentFaker.music.genre();
+        const album = songRng() > 0.2 ? albumTitle : 'Single';
+
+        const lyrics = Array.from({ length: 4 }, () => {
+            return [
+                capitalize(currentFaker.word.adjective()),
+                currentFaker.word.noun(),
+                currentFaker.word.verb(),
+                "in the",
+                currentFaker.music.genre(),
+                currentFaker.location.city()
+            ].join(' ');
+        }).join('\n');
+
+        const totalLikes = Math.floor(likes) + (rng() < (likes % 1) ? 1 : 0);
+
         songs.push({
             id: index,
-            title: currentFaker.music.songName(),
-            artist: currentFaker.music.artist(),
-            album: rng() > 0.2 ? albumTitle : 'Single',
-            genre: currentFaker.music.genre(),
+            title,
+            artist,
+            album,
+            genre,
             likes: totalLikes,
-            review: currentFaker.lorem.paragraph(),
+            lyrics,
             mediaSeed: `${pageSeed}-${i}`
         });
     }
@@ -56,5 +77,5 @@ app.get('/api/songs', (req, res) => {
 });
 
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+    console.log(`Server is running`);
 });

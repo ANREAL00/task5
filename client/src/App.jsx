@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import axios from 'axios';
-import { RefreshCw, Play, Table as TableIcon, LayoutGrid, Heart, ChevronDown, ChevronUp, Music, Volume2 } from 'lucide-react';
+import { RefreshCw, Table as TableIcon, LayoutGrid, Heart, ChevronDown, ChevronUp } from 'lucide-react';
 import { debounce } from 'lodash';
 import AlbumCover from './components/AlbumCover';
 import MusicPlayer from './components/MusicPlayer';
@@ -20,9 +20,19 @@ const App = () => {
   const [loading, setLoading] = useState(false);
   const [expandedId, setExpandedId] = useState(null);
 
+  const [activeWordIndex, setActiveWordIndex] = useState(-1);
+
+  useEffect(() => {
+    if (activeWordIndex >= 0) {
+      const el = document.getElementById('active-vocal');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+    }
+  }, [activeWordIndex]);
+
   const paramsRef = useRef(params);
   const isFetchingRef = useRef(false);
   const sentinelRef = useRef();
+
 
   const fetchSongs = useCallback(async (currentParams, currentPage, append = false) => {
     if (isFetchingRef.current && append) return;
@@ -61,6 +71,7 @@ const App = () => {
     setPage(1);
     setExpandedId(null);
     debouncedFetch(params);
+    window.scrollTo({ top: 0, behavior: 'instant' });
     paramsRef.current = params;
     return () => debouncedFetch.cancel();
   }, [params, debouncedFetch]);
@@ -79,9 +90,6 @@ const App = () => {
     setExpandedId(expandedId === id ? null : id);
   };
 
-  const getLyrics = (title) => {
-    return `Every beat reminds me of you, tearing me apart\nIn the million suns that shine, you're the brightest star\nAt the break of dawn, you're all I want, no matter how far\n\nOh ${title.split(' ')[0]}, I try to move on...`;
-  }
 
   const handleViewChange = (mode) => {
     setViewMode(mode);
@@ -89,6 +97,7 @@ const App = () => {
     setExpandedId(null);
     fetchSongs(params, 1, false);
   };
+
 
   useEffect(() => {
     if (viewMode !== 'gallery') return;
@@ -131,8 +140,8 @@ const App = () => {
         </div>
 
         <div className="view-toggle">
-          <button className={`btn-toggle ${viewMode === 'table' ? 'active' : ''}`} onClick={() => handleViewChange('table')}><TableIcon size={18} /></button>
-          <button className={`btn-toggle ${viewMode === 'gallery' ? 'active' : ''}`} onClick={() => handleViewChange('gallery')}><LayoutGrid size={18} /></button>
+          <button className={`btn-toggle ${viewMode === 'table' ? 'active' : ''}`} onClick={() => handleViewChange('table')} title="Table View"><TableIcon size={18} /></button>
+          <button className={`btn-toggle ${viewMode === 'gallery' ? 'active' : ''}`} onClick={() => handleViewChange('gallery')} title="Gallery View"><LayoutGrid size={18} /></button>
         </div>
       </div>
 
@@ -182,15 +191,41 @@ const App = () => {
                               <h2>{song.title}</h2>
                               <p className="song-meta">from <span>{song.album}</span> by <span>{song.artist}</span></p>
 
-                              <MusicPlayer song={song} />
+                              <MusicPlayer
+                                song={song}
+                                lyrics={song.lyrics}
+                                onWordIndexChange={setActiveWordIndex}
+                              />
 
                               <div className="lyrics-tabs">
                                 <span className="active">Lyrics</span>
                               </div>
                               <div className="lyrics-body">
-                                {getLyrics(song.title).split('\n').map((line, i) => (
-                                  <p key={i}>{line}</p>
-                                ))}
+                                {(() => {
+                                  let cumulativeIndex = 0;
+                                  return song.lyrics.split('\n').map((line, lIdx) => {
+                                    const words = line.split(/\s+/).filter(w => w.length > 0);
+
+                                    const lineItems = words.map((word, wIdx) => {
+                                      const idx = cumulativeIndex++;
+                                      return (
+                                        <span
+                                          key={wIdx}
+                                          id={idx}
+                                          className={`lyrics-word`}
+                                        >
+                                          {word}{' '}
+                                        </span>
+                                      );
+                                    });
+
+                                    return (
+                                      <div key={lIdx} className={`lyrics-line`}>
+                                        {lineItems}
+                                      </div>
+                                    );
+                                  });
+                                })()}
                               </div>
                             </div>
                           </div>
@@ -228,7 +263,7 @@ const App = () => {
                   setPage(targetPage);
                   setViewMode('table');
                   setExpandedId(song.id);
-                  fetchSongs(params, targetPage, false); // Fetch only the target page
+                  fetchSongs(params, targetPage, false);
                   window.scrollTo(0, 0);
                 }}>
                   <AlbumCover song={song} />

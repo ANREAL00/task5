@@ -244,6 +244,7 @@ body {
   background: #e2e8f0;
   border-radius: 3px;
   position: relative;
+  width: 100%;
 }
 
 .progress-filled {
@@ -251,25 +252,9 @@ body {
   height: 100%;
   background: var(--primary);
   border-radius: 3px;
-  transition: width 0.3s;
+  transition: width 0.1s linear;
 }
 
-.progress-filled.is-playing {
-  width: 100%;
-  animation: progressPulse 2s linear infinite;
-}
-
-@keyframes progressPulse {
-  0% {
-    width: 0%;
-    opacity: 0.8;
-  }
-
-  100% {
-    width: 100%;
-    opacity: 1;
-  }
-}
 
 .player-btn {
   cursor: pointer;
@@ -316,13 +301,73 @@ body {
   border-bottom-color: var(--primary);
 }
 
+.lyrics-word {
+  display: inline-block;
+  font-size: 1.15rem;
+  line-height: 1.6;
+  color: #94a3b8;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-right: 0.25rem;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.lyrics-word.active {
+  color: var(--primary);
+  font-weight: 800;
+  transform: scale(1.05);
+  background: rgba(37, 99, 235, 0.08);
+  text-shadow: 0 0 15px rgba(37, 99, 235, 0.2);
+}
+
 .lyrics-body {
-  font-size: 1.1rem;
-  line-height: 1.8;
-  color: var(--text-main);
-  max-height: 250px;
+  padding: 1.5rem;
+  background: rgba(248, 250, 252, 0.9);
+  backdrop-filter: blur(8px);
+  border-radius: 20px;
+  border: 1px solid rgba(59, 130, 246, 0.1);
+  margin-top: 1.5rem;
+  max-height: 350px;
   overflow-y: auto;
-  padding-right: 1rem;
+  scroll-behavior: smooth;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
+}
+
+.lyrics-line {
+  margin-bottom: 1rem;
+  padding-left: 1rem;
+  border-left: 4px solid transparent;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.lyrics-line.active {
+  border-left-color: var(--primary);
+  background: linear-gradient(90deg, rgba(37, 99, 235, 0.05), transparent);
+  transform: translateX(4px);
+}
+
+.lyrics-line:contains('---') {
+  font-family: monospace;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--primary);
+  opacity: 0.6;
+  text-align: center;
+  border: none;
+  margin: 1.5rem 0;
+}
+
+.lyrics-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.lyrics-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.lyrics-body::-webkit-scrollbar-thumb {
+  background: #e2e8f0;
+  border-radius: 3px;
 }
 
 .loader-sentinel {
