@@ -4,7 +4,7 @@ import { Faker, en, pl } from '@faker-js/faker';
 import seedrandom from 'seedrandom';
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 const plCustom = {
     music: {

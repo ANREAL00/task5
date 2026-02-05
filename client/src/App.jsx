@@ -6,11 +6,11 @@ import AlbumCover from './components/AlbumCover';
 import MusicPlayer from './components/MusicPlayer';
 import './index.css';
 
-const API_BASE = 'http://localhost:3001/api';
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3001/api';
 
 const App = () => {
   const [params, setParams] = useState({
-    seed: '42',
+    seed: '123',
     locale: 'en_US',
     likes: 5.0,
   });
