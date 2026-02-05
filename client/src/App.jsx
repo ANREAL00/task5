@@ -3,6 +3,7 @@ import axios from 'axios';
 import { RefreshCw, Play, Table as TableIcon, LayoutGrid, Heart, ChevronDown, ChevronUp, Music, Volume2 } from 'lucide-react';
 import { debounce } from 'lodash';
 import AlbumCover from './components/AlbumCover';
+import MusicPlayer from './components/MusicPlayer';
 import './index.css';
 
 const API_BASE = 'http://localhost:3001/api';
@@ -181,14 +182,7 @@ const App = () => {
                               <h2>{song.title}</h2>
                               <p className="song-meta">from <span>{song.album}</span> by <span>{song.artist}</span></p>
 
-                              <div className="player-controls">
-                                <Play size={24} fill="#3b82f6" color="#3b82f6" style={{ cursor: 'pointer' }} />
-                                <Volume2 size={20} color="#94a3b8" />
-                                <div className="progress-bar">
-                                  <div className="progress-filled"></div>
-                                </div>
-                                <span style={{ fontSize: '0.8rem', color: '#64748b' }}>2:12</span>
-                              </div>
+                              <MusicPlayer song={song} />
 
                               <div className="lyrics-tabs">
                                 <span className="active">Lyrics</span>

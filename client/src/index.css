@@ -247,10 +247,52 @@ body {
 }
 
 .progress-filled {
-  width: 35%;
+  width: 0%;
   height: 100%;
   background: var(--primary);
   border-radius: 3px;
+  transition: width 0.3s;
+}
+
+.progress-filled.is-playing {
+  width: 100%;
+  animation: progressPulse 2s linear infinite;
+}
+
+@keyframes progressPulse {
+  0% {
+    width: 0%;
+    opacity: 0.8;
+  }
+
+  100% {
+    width: 100%;
+    opacity: 1;
+  }
+}
+
+.player-btn {
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.player-btn:hover {
+  transform: scale(1.1);
+}
+
+.player-meta {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.player-meta label {
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
 }
 
 .lyrics-tabs {
